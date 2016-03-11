@@ -1,0 +1,4 @@
+home: /home/ubuntu
+remote_user: ubuntu
+tmux: 2.1
+user: ubuntu

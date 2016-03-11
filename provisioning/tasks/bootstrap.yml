@@ -1,0 +1,49 @@
+- name: Add repositories
+  apt_repository: repo='ppa:git-core/ppa' state=present
+
+- name: Apt update
+  apt: update_cache=true
+
+- name: Set locale for god sake
+  shell: "{{ item }}"
+  with_items:
+    - apt-get install --reinstall locales
+    - dpkg-reconfigure locales
+    - locale-gen en_US.UTF-8
+    - update-locale LANG=en_US.UTF-8
+    - dpkg-reconfigure locales
+    - locale-gen en_US.UTF-8
+    - locale-gen --no-purge --lang en_US.UTF-8
+    - dpkg-reconfigure locales
+    - export LANGUAGE="en_US.UTF-8"
+    - export LC_ALL=en_US.UTF-8
+    - echo 'LANGUAGE="en_US.UTF-8"' >> /etc/default/locale
+    - echo 'LC_ALL="en_US.UTF-8"' >> /etc/default/locale
+
+- name: Install stuff
+  apt: pkg={{ item }} state=present force=yes
+  with_items:
+    - aptitude
+    - curl
+    - git
+    - unzip
+    - htop
+    - libevent-dev
+    - libncurses-dev
+
+- name: Create ubuntu user
+  user:
+    name: "{{ user }}"
+    shell: /bin/bash
+    home: "{{ home }}"
+    state: present
+
+- name: Download tmux
+  get_url: url=https://github.com/tmux/tmux/releases/download/{{ tmux }}/tmux-{{ tmux }}.tar.gz dest=/tmp/ mode=0644
+  tags:
+    - tmux
+
+- name: Unarchive tmux
+  unarchive: src=/tmp/tmux-{{ tmux }}.tar.gz dest=/tmp/ copy=no
+  tags:
+    - tmux
