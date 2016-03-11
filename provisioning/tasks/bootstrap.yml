@@ -59,8 +59,9 @@
 - name: Create ubuntu user
   user:
     name: "{{ user }}"
-    shell: /bin/bash
+    groups: docker,sudo
     home: "{{ home }}"
+    shell: /bin/bash
     state: present
 
 - name: Create .bash_aliases config for ubuntu user
