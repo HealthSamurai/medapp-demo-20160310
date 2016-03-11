@@ -1,7 +1,19 @@
-- name: Add repositories
-  apt_repository: repo='ppa:git-core/ppa' state=present
+- name: APT update
+  apt: update_cache=true
 
-- name: Apt update
+- name: Install APT stuff
+  apt: pkg={{ item }} state=present force=yes
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+
+- name: Add repositories
+  apt_repository: repo="{{ item }}" state=present
+  with_items:
+    - ppa:git-core/ppa
+    - deb https://apt.dockerproject.org/repo ubuntu-trusty main
+
+- name: One more APT update
   apt: update_cache=true
 
 - name: Set locale for god sake
@@ -21,8 +33,9 @@
     - echo 'LC_ALL="en_US.UTF-8"' >> /etc/default/locale
 
 - name: Uninstall outdated stuff
-  apt: pkg={{ item }} state=absent force=yes
+  apt: pkg={{ item }} state=absent force=yes purge=yes
   with_items:
+    - lxc-docker
     - tmux
 
 - name: Install stuff
@@ -31,6 +44,7 @@
     - aptitude
     - build-essential
     - curl
+    - docker-engine
     - git
     - htop
     - libevent-dev
