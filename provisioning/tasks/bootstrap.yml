@@ -20,6 +20,11 @@
     - echo 'LANGUAGE="en_US.UTF-8"' >> /etc/default/locale
     - echo 'LC_ALL="en_US.UTF-8"' >> /etc/default/locale
 
+- name: Uninstall outdated stuff
+  apt: pkg={{ item }} state=absent force=yes
+  with_items:
+    - tmux
+
 - name: Install stuff
   apt: pkg={{ item }} state=present force=yes
   with_items:
@@ -38,6 +43,11 @@
     shell: /bin/bash
     home: "{{ home }}"
     state: present
+
+- name: Create .bash_aliases config for ubuntu user
+  template: src=bash_aliases.j2 dest={{ home }}/.bash_aliases owner={{ user }} group={{ user }} mode=0644
+  become: yes
+  become_user: "{{ user }}"
 
 - name: Download tmux
   get_url: url=https://github.com/tmux/tmux/releases/download/{{ tmux }}/tmux-{{ tmux }}.tar.gz dest=/tmp/ mode=0644
