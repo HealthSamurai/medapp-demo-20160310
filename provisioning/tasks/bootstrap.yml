@@ -54,6 +54,7 @@
     - htop
     - libevent-dev
     - libncurses-dev
+    - mosh
     - unzip
 
 - name: Create ubuntu user
