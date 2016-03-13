@@ -37,25 +37,18 @@
     - echo 'LANGUAGE="en_US.UTF-8"' >> /etc/default/locale
     - echo 'LC_ALL="en_US.UTF-8"' >> /etc/default/locale
 
-- name: Uninstall outdated stuff
+- name: Uninstall outdated docker
   apt: pkg={{ item }} state=absent force=yes purge=yes
   with_items:
     - lxc-docker
-    - tmux
 
-- name: Install stuff
+- name: Install docker
   apt: pkg={{ item }} state=present force=yes
   with_items:
-    - aptitude
-    - build-essential
-    - curl
     - docker-engine
-    - git
-    - htop
-    - libevent-dev
-    - libncurses-dev
-    - mosh
-    - unzip
+
+- name: Start Docker
+  service: name=docker state=restarted
 
 - name: Create ubuntu user
   user:
@@ -69,27 +62,3 @@
   template: src=bash_aliases.j2 dest={{ home }}/.bash_aliases owner={{ user }} group={{ user }} mode=0644
   become: yes
   become_user: "{{ user }}"
-
-- name: Download tmux
-  get_url: url=https://github.com/tmux/tmux/releases/download/{{ tmux }}/tmux-{{ tmux }}.tar.gz dest=/tmp/ mode=0644
-  become: yes
-  become_user: "{{ user }}"
-  tags:
-    - tmux
-
-- name: Unarchive tmux
-  unarchive: src=/tmp/tmux-{{ tmux }}.tar.gz dest=/tmp/ copy=no
-  become: yes
-  become_user: "{{ user }}"
-  tags:
-    - tmux
-
-- name: Unarchive tmux
-  shell: cd /tmp/tmux-{{ tmux }} && ./configure --prefix={{ home }} && make --jobs=2 && make install
-  become: yes
-  become_user: "{{ user }}"
-  tags:
-    - tmux
-
-- name: Start Docker
-  service: name=docker state=restarted

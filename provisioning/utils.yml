@@ -1,0 +1,40 @@
+- hosts: app
+  sudo: true
+  gather_facts: yes
+  tasks:
+  - name: Uninstall outdated utils
+    apt: pkg={{ item }} state=absent force=yes purge=yes
+    with_items:
+      - tmux
+
+  - name: Install utils
+    apt: pkg={{ item }} state=present force=yes
+    with_items:
+      - aptitude
+      - build-essential
+      - git
+      - htop
+      - libevent-dev
+      - libncurses-dev
+      - mosh
+
+  - name: Download tmux
+    get_url: url=https://github.com/tmux/tmux/releases/download/{{ tmux }}/tmux-{{ tmux }}.tar.gz dest=/tmp/ mode=0644
+    become: yes
+    become_user: "{{ user }}"
+    tags:
+      - tmux
+
+  - name: Unarchive tmux
+    unarchive: src=/tmp/tmux-{{ tmux }}.tar.gz dest=/tmp/ copy=no
+    become: yes
+    become_user: "{{ user }}"
+    tags:
+      - tmux
+
+  - name: Compile tmux
+    shell: cd /tmp/tmux-{{ tmux }} && ./configure --prefix={{ home }} && make --jobs=2 && make install
+    become: yes
+    become_user: "{{ user }}"
+    tags:
+      - tmux
