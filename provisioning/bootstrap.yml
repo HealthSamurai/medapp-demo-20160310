@@ -1,6 +1,53 @@
 - hosts: app
   sudo: true
   gather_facts: yes
+  handlers:
+    - include: handlers/main.yml
   tasks:
-    - name: Install PostgreSQl and stuff, create user and folders
-      include: ./tasks/bootstrap.yml
+    - name: APT update
+      apt: update_cache=true
+
+    # - name: Install APT keys
+    #   apt_key: id={{ item.id}} url={{ item.url }} state=present
+    #   with_items:
+    #     - { id: '58118E89F3A912897C070ADBF76221572C52609D', url: 'hkp://p80.pool.sks-keyservers.net:80' }
+
+    - name: Add APT repositories
+      apt_repository: repo="{{ item }}" state=present
+      with_items:
+        - ppa:git-core/ppa
+
+    - name: One more APT update
+      apt: update_cache=true
+
+    - name: Set locale for god sake
+      shell: "{{ item }}"
+      with_items:
+        - apt-get install --reinstall locales
+        - dpkg-reconfigure locales
+        - locale-gen en_US.UTF-8
+        - update-locale LANG=en_US.UTF-8
+        - dpkg-reconfigure locales
+        - locale-gen en_US.UTF-8
+        - locale-gen --no-purge --lang en_US.UTF-8
+        - dpkg-reconfigure locales
+        - export LANGUAGE="en_US.UTF-8"
+        - export LC_ALL=en_US.UTF-8
+        - echo 'LANGUAGE="en_US.UTF-8"' >> /etc/default/locale
+        - echo 'LC_ALL="en_US.UTF-8"' >> /etc/default/locale
+
+    - name: Create ubuntu user
+      user:
+        name: "{{ user }}"
+        groups: docker,sudo
+        home: "{{ home }}"
+        shell: /bin/bash
+        state: present
+
+    - name: Create .bash_aliases config for ubuntu user
+      template: src=templates/bash_aliases.j2 dest={{ home }}/.bash_aliases owner={{ user }} group={{ user }} mode=0644
+      become: yes
+      become_user: "{{ user }}"
+
+    - name: Install docker
+      include: ./tasks/docker.yml
