@@ -32,8 +32,13 @@
   tags:
     - docker
 
-- name: Create docker service
-  template: src=templates/docker.service.j2 dest=/etc/systemd/system/docker.service group=root owner=root
+# - name: Create docker service
+#   template: src=templates/docker.service.j2 dest=/lib/systemd/system/docker.service group=root owner=root
+#   tags:
+#     - docker
+
+- name: Create docker daemon configuration
+  template: src=templates/daemon.json.j2 dest=/etc/docker/daemon.json group=root owner=root
   tags:
     - docker
 

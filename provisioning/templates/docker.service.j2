@@ -6,7 +6,7 @@ Requires=docker.socket
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/docker daemon -H fd:// --storage-opts="dm.basesize=100G"
+ExecStart=/usr/bin/docker daemon -H fd:// --storage-opt="dm.basesize=300G"
 MountFlags=slave
 LimitNOFILE=1048576
 LimitNPROC=1048576
