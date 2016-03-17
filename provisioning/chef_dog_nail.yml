@@ -7,6 +7,27 @@
         src=templates/etc/nginx/sites-available/medapp-demo.conf.j2
         dest=/etc/nginx/sites-available/demo
         mode=0644
+      tags:
+        - nginx_config
+
+    - name: Install ssl key
+      template:
+        src=secure/etc/nginx/ssl/STAR_hospital-systems_com.key
+        dest=/etc/nginx/ssl/demo.key
+        mode=0600
+      tags:
+        - nginx_ssl
+
+    - name: Install ssl certificate
+      template:
+        src=secure/etc/nginx/ssl/STAR_hospital-systems_com.pem
+        dest=/etc/nginx/ssl/demo.crt
+        mode=0600
+      tags:
+        - nginx_ssl
 
     - name: Reload nginx config
       service: name=nginx state=reloaded
+      tags:
+        - nginx_config
+        - nginx_ssl
