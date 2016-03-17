@@ -1,0 +1,12 @@
+- hosts: app
+  sudo: true
+  gather_facts: yes
+  tasks:
+    - name: Fix legacy nginx config
+      template:
+        src=templates/etc/nginx/sites-available/medapp-demo.conf.j2
+        dest=/etc/nginx/sites-available/demo
+        mode=0644
+
+    - name: Reload nginx config
+      service: name=nginx state=reloaded

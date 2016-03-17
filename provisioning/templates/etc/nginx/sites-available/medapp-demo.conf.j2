@@ -1,0 +1,58 @@
+upstream demo  {
+  server 10.10.96.101 max_fails=1 fail_timeout=10s;
+}
+
+server {
+  server_name demo.hospital-systems.com ey.hospital-systems.com;
+  listen 80;
+  rewrite ^(.*) https://$host$1 permanent;
+}
+
+server {
+  server_name demo.hospital-systems.com ey.hospital-systems.com;
+  listen 443;
+  gzip on;
+  ssl on;
+  ssl_certificate     /etc/nginx/ssl/demo.crt;
+  ssl_certificate_key /etc/nginx/ssl/demo.key;
+
+  client_max_body_size 4G;
+
+  keepalive_timeout 5;
+
+  # Support Ctrl+F5 cache refresh
+  set $bypass_cache "0";
+
+  if ($http_cache_control = "no-cache") {
+    set $bypass_cache "1";
+  }
+
+  location / {
+    if (-f /etc/nginx/demo.maintenance) {
+       return 503;
+    }
+    if (-f /etc/nginx/demo.stopped) {
+       return 501;
+    }
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Real-IP $remote_addr;
+
+    proxy_cache_bypass $bypass_cache;
+    proxy_cache cache;
+    proxy_cache_valid all 10m;
+    proxy_read_timeout 600000;
+
+    proxy_pass http://demo;
+  }
+
+  error_page 503 /503.html;
+  location = /503.html {
+    root /etc/nginx/error;
+  }
+  error_page 501 =503 /501.html;
+  location = /501.html {
+    root /etc/nginx/error;
+  }
+}
