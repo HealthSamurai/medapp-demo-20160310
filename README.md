@@ -24,14 +24,15 @@ with Ubuntu 14.04 with `ubuntu` user and `ubuntu`.
 
 ```bash
 eval `ssh-agent`
-ssh-add path/to/repository/secure/local.pem
-ssh ubuntu@localhost -p 7022
+ssh -i path/to/repository/secure/local.pem ubuntu@localhost -p 7022
 ```
 
 Use `ping.yml` to test ansible and docker:
 
 ```bash
-ansible-playbook -i inventories/local ping.yml
+ansible-playbook --private-key=path/to/repository/secure/local.pem \
+                 --inventory=inventories/local \
+                 ping.yml
 ```
 
 # Playbooks
@@ -41,5 +42,7 @@ ansible-playbook -i inventories/local ping.yml
 Install stuff and Docker
 
 ```bash
-ansible-playbook -i inventories/local bootstrap.yml
+ansible-playbook --private-key=path/to/repository/secure/local.pem \
+                 --inventory=inventories/local \
+                 bootstrap.yml
 ```
